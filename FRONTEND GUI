@@ -66,17 +66,25 @@ public class MainMenuTest extends Application {
             isRunning[0] = !isRunning[0];
 
             if (isRunning[0]) {
+
                 toggleBtn.setText("Stop");
                 status.setText("Status: RUNNING");
                 status.setStyle("-fx-text-fill: #3ba55d;");
+
+                System.out.println("[SYSTEM] ISHARA ENGINE STARTED");
+                toggleBtn.setStyle("-fx-background-color: #3ba55d; -fx-text-fill: white; -fx-background-radius: 20;");
+
             } else {
+
                 toggleBtn.setText("Start");
                 status.setText("Status: IDLE");
                 status.setStyle("-fx-text-fill: #ffcc00;");
+
+                System.out.println("[SYSTEM] ISHARA ENGINE STOPPED");
+                toggleBtn.setStyle(buttonStyle);
             }
         });
 
-      
         settingsBtn.setOnAction(e -> {
             SettingsWindow settingsWindow = new SettingsWindow();
             Stage settingsStage = new Stage();
