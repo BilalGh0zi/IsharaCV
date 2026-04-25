@@ -1,3 +1,4 @@
+//uses JNA to controll particularly volume functions
 package controllers;
 
 import com.sun.jna.Native;
@@ -16,26 +17,20 @@ public class VolumeController {
 
     // Simulates pressing the Volume Up key (key code 0xAF)
     public static void volumeUp() {
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAF), new BYTE((byte) 0),
-                new DWORD(0), new ULONG_PTR(0)); // key down
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAF), new BYTE((byte) 0),
-                new DWORD(2), new ULONG_PTR(0)); // key up
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAF), new BYTE((byte) 0),new DWORD(0), new ULONG_PTR(0)); // key down
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAF), new BYTE((byte) 0),new DWORD(2), new ULONG_PTR(0)); // key up
         System.out.println("[VolumeController] Volume Up");
     }
     // Simulates pressing the Volume Down key (key code 0xAE)
     public static void volumeDown() {
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAE), new BYTE((byte) 0),
-                new DWORD(0), new ULONG_PTR(0)); // key down
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAE), new BYTE((byte) 0),
-                new DWORD(2), new ULONG_PTR(0)); // key up
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAE), new BYTE((byte) 0),new DWORD(0), new ULONG_PTR(0)); // key down
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAE), new BYTE((byte) 0),new DWORD(2), new ULONG_PTR(0)); // key up
         System.out.println("[VolumeController] Volume Down");
     }
     // Simulates pressing the Mute key (key code 0xAD)
     public static void mute() {
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAD), new BYTE((byte) 0),
-                new DWORD(0), new ULONG_PTR(0)); // key down
-        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAD), new BYTE((byte) 0),
-                new DWORD(2), new ULONG_PTR(0)); // key up
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAD), new BYTE((byte) 0),new DWORD(0), new ULONG_PTR(0)); // key down
+        User32.INSTANCE.keybd_event(new BYTE((byte) 0xAD), new BYTE((byte) 0),new DWORD(2), new ULONG_PTR(0)); // key up
         System.out.println("[VolumeController] Mute toggled");
     }
 }

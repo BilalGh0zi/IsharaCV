@@ -24,9 +24,7 @@ public class MainMenu {
     private Label RunStatus;
     private Label ModeLabel;
 
-    public MainMenu(AppStateManager stateManager,
-                    CVProcessManager cvManager,
-                    GestureMapper gestureMapper) {
+    public MainMenu(AppStateManager stateManager,CVProcessManager cvManager,GestureMapper gestureMapper) {
         this.stateManager = stateManager;
         this.cvManager = cvManager;
         this.gestureMapper = gestureMapper;
@@ -94,18 +92,17 @@ public class MainMenu {
         gestureThread.setDaemon(true);
         gestureThread.start();
 
+        //fix modelabel bilal
         
-        gestureMapper.setModeChangeListener(isMoveMode -> {
-            Platform.runLater(() -> {
-                if (isMoveMode) {
+                if (gestureMapper.isMoveMode()) {
                     ModeLabel.setText("Mode: MOVE");
                     ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: orange;");
                 } else {
                     ModeLabel.setText("Mode: VOLUME");
                     ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: blue;");
                 }
-            });
-        });
+            ;
+        ;
 
         stateManager.setRunning();
         RunStatus.setText("Status: RUNNING");

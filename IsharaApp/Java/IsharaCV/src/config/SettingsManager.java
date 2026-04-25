@@ -1,78 +1,74 @@
+//manages settings and saving to json
 package config;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import system.PathFinder;
 import java.io.*;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
-
+import system.PathFinder;
 public class SettingsManager {
 
     private static SettingsManager instance;
-    private static final String SETTINGS_PATH = "C:\\Users\\Bilal\\Desktop\\IsharaApp\\config\\settings.json";
-    private static final Gson gson = new Gson();
+    private static final Gson gson = new Gson(); //gson reads json
 
-    // Tuning values stored in memory
-    private int mouseSpeed      = 10;
-    private int volumeCooldown  = 100;
-    private int clickCooldown   = 800;
-    private int muteCooldown    = 1500;
-    private int switchCooldown  = 1500;
-    private int moveCooldown    = 80;
-    private int framesRequired  = 4;
+    private int spd= 10; //some default values
+    private int volCldn= 100;
+    private int clkCldn= 800;
+    private int muteCldn= 1500;
+    private int swtchCldn= 1500;
+    private int mvCldn= 80;
+    private int reqFrames = 4;
 
-    private SettingsManager() {}
-
-    public static SettingsManager getInstance() {
-        if (instance == null) {
+    
+    private SettingsManager(){}
+    public static SettingsManager getInstance(){ //prevents more than 1 settingsmanager
+        if (instance == null){
             instance = new SettingsManager();
         }
         return instance;
     }
 
-    // -------------------------------------------------------
-    // SAVE - writes both gesture map and tuning to one JSON
-    // -------------------------------------------------------
-    public void save(Map<String, String> gestureMap) {
-        // Bundle everything into one map to save as JSON
-        Map<String, String> fullMap = new HashMap<>(gestureMap);
-        fullMap.put("__mouseSpeed",     String.valueOf(mouseSpeed));
-        fullMap.put("__volumeCooldown", String.valueOf(volumeCooldown));
-        fullMap.put("__clickCooldown",  String.valueOf(clickCooldown));
-        fullMap.put("__muteCooldown",   String.valueOf(muteCooldown));
-        fullMap.put("__switchCooldown", String.valueOf(switchCooldown));
-        fullMap.put("__moveCooldown",   String.valueOf(moveCooldown));
-        fullMap.put("__framesRequired", String.valueOf(framesRequired));
+    // Gets settings path at runtime with PathFinder
+    private String getSettingsPath() {
+        return PathFinder.getInstance().getConfigPath("settings.json");
+    }
 
-        try (Writer writer = new FileWriter(SETTINGS_PATH)) {
-            gson.toJson(fullMap, writer);
+    public void save(Map<String, String> gestureMap) {
+        Map<String, String> SetMap = new HashMap<>(gestureMap);
+        SetMap.put("__mouseSpeed",     String.valueOf(spd));
+        SetMap.put("__volumeCooldown", String.valueOf(volCldn));
+        SetMap.put("__clickCooldown",  String.valueOf(clkCldn));
+        SetMap.put("__muteCooldown",   String.valueOf(muteCldn));
+        SetMap.put("__switchCooldown", String.valueOf(swtchCldn));
+        SetMap.put("__moveCooldown",   String.valueOf(mvCldn));
+        SetMap.put("__framesRequired", String.valueOf(reqFrames));
+
+        try (Writer writer = new FileWriter(getSettingsPath())) {
+            gson.toJson(SetMap, writer);
             System.out.println("[SettingsManager] Settings saved.");
         } catch (IOException e) {
             System.out.println("[SettingsManager] Failed to save: " + e.getMessage());
         }
     }
 
-    // -------------------------------------------------------
-    // LOAD - reads JSON and separates gesture map from tuning
-    // -------------------------------------------------------
-    public Map<String, String> load() {
-        try (Reader reader = new FileReader(SETTINGS_PATH)) {
-            Type type = new TypeToken<Map<String, String>>() {}.getType();
-            Map<String, String> fullMap = gson.fromJson(reader, type);
-
-            // Extract tuning values (keys starting with __)
-            if (fullMap.containsKey("__mouseSpeed"))     mouseSpeed     = Integer.parseInt(fullMap.get("__mouseSpeed"));
-            if (fullMap.containsKey("__volumeCooldown")) volumeCooldown = Integer.parseInt(fullMap.get("__volumeCooldown"));
-            if (fullMap.containsKey("__clickCooldown"))  clickCooldown  = Integer.parseInt(fullMap.get("__clickCooldown"));
-            if (fullMap.containsKey("__muteCooldown"))   muteCooldown   = Integer.parseInt(fullMap.get("__muteCooldown"));
-            if (fullMap.containsKey("__switchCooldown")) switchCooldown = Integer.parseInt(fullMap.get("__switchCooldown"));
-            if (fullMap.containsKey("__moveCooldown"))   moveCooldown   = Integer.parseInt(fullMap.get("__moveCooldown"));
-            if (fullMap.containsKey("__framesRequired")) framesRequired = Integer.parseInt(fullMap.get("__framesRequired"));
-
-            // Return only gesture mappings (remove __ keys)
+    public Map<String, String> load(){
+        try (Reader reader = new FileReader(getSettingsPath())) {
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            Map<String, String> SetMap = gson.fromJson(reader, type);
+            //the "__" prefix keeps json simple
+            if (SetMap.containsKey("__mouseSpeed")){spd     = Integer.parseInt(SetMap.get("__mouseSpeed"));}
+            if (SetMap.containsKey("__volumeCooldown")){volCldn = Integer.parseInt(SetMap.get("__volumeCooldown"));}
+            if (SetMap.containsKey("__clickCooldown")){clkCldn  = Integer.parseInt(SetMap.get("__clickCooldown"));}
+            if (SetMap.containsKey("__muteCooldown")){muteCldn   = Integer.parseInt(SetMap.get("__muteCooldown"));}
+            if (SetMap.containsKey("__switchCooldown")){swtchCldn = Integer.parseInt(SetMap.get("__switchCooldown"));}
+            if (SetMap.containsKey("__moveCooldown")){mvCldn   = Integer.parseInt(SetMap.get("__moveCooldown"));}
+            if (SetMap.containsKey("__framesRequired")){reqFrames = Integer.parseInt(SetMap.get("__framesRequired"));}
+            //only  keys prefixed by underscores are numerical values
             Map<String, String> gestureMap = new HashMap<>();
-            for (Map.Entry<String, String> entry : fullMap.entrySet()) {
+            for (Map.Entry<String, String> entry : SetMap.entrySet()) {
                 if (!entry.getKey().startsWith("__")) {
                     gestureMap.put(entry.getKey(), entry.getValue());
                 }
@@ -86,8 +82,7 @@ public class SettingsManager {
             return getDefaults();
         }
     }
-
-    // Gesture map defaults
+    //default map
     private Map<String, String> getDefaults() {
         Map<String, String> defaults = new HashMap<>();
         defaults.put("ONE_FINGER",   "VOLUME_UP");
@@ -98,23 +93,20 @@ public class SettingsManager {
         defaults.put("ROCK_HAND",    "SWITCH_MODE");
         return defaults;
     }
+//getters and setters
+    public int getMouseSpeed(){ return spd;}
+    public int getVolumeCooldown(){ return volCldn; }
+    public int getClickCooldown(){ return clkCldn;}
+    public int getMuteCooldown(){ return muteCldn;}
+    public int getSwitchCooldown(){ return swtchCldn; }
+    public int getMoveCooldown(){ return mvCldn;}
+    public int getFramesRequired(){ return reqFrames; }
 
-    // -------------------------------------------------------
-    // GETTERS and SETTERS for tuning values
-    // -------------------------------------------------------
-    public int getMouseSpeed()      { return mouseSpeed; }
-    public int getVolumeCooldown()  { return volumeCooldown; }
-    public int getClickCooldown()   { return clickCooldown; }
-    public int getMuteCooldown()    { return muteCooldown; }
-    public int getSwitchCooldown()  { return switchCooldown; }
-    public int getMoveCooldown()    { return moveCooldown; }
-    public int getFramesRequired()  { return framesRequired; }
-
-    public void setMouseSpeed(int v)      { mouseSpeed = v; }
-    public void setVolumeCooldown(int v)  { volumeCooldown = v; }
-    public void setClickCooldown(int v)   { clickCooldown = v; }
-    public void setMuteCooldown(int v)    { muteCooldown = v; }
-    public void setSwitchCooldown(int v)  { switchCooldown = v; }
-    public void setMoveCooldown(int v)    { moveCooldown = v; }
-    public void setFramesRequired(int v)  { framesRequired = v; }
+    public void setMouseSpeed(int v){ spd = v;}
+    public void setVolumeCooldown(int v){ volCldn = v; }
+    public void setClickCooldown(int v){ clkCldn = v;}
+    public void setMuteCooldown(int v){ muteCldn = v;}
+    public void setSwitchCooldown(int v){ swtchCldn = v; }
+    public void setMoveCooldown(int v){ mvCldn = v; }
+    public void setFramesRequired(int v){ reqFrames = v; }
 }

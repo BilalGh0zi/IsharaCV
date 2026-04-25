@@ -1,3 +1,4 @@
+//creates a new gesture object depending on the input
 package gestures;
 
 public class GestureFactory {

@@ -1,14 +1,10 @@
-
+//abstract parent of all gesture classes
 package gestures; 
 
 public abstract class Gesture{
-     String name;
-     public Gesture(String name){
-        this.name = name;
-     }
+   String name;
+   public Gesture(String name){this.name = name;}
+   public String getname(){return name;}
 
-     public String getname(){
-        return name;
-     }
-     public abstract void execute();
+   public abstract void execute();
 }

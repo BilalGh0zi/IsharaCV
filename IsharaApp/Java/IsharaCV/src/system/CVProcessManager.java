@@ -1,33 +1,36 @@
+//starts and stops the Python GestureServer 
 package system;
-
+import system.PathFinder;
 public class CVProcessManager {
+    private Process pyProcess;
 
-    private static String PYTHON_SCRIPT = "C:\\Users\\Bilal\\Desktop\\IsharaApp\\Python\\gesture_server.py";
+    public void start(){
+        try {
+            //getting python path w the help of pathfinder
+            String ServPath = PathFinder.getInstance().getPythonPath("gesture_server.py");
+            String pyDir  = PathFinder.getInstance().getPythonPath("");
 
-    private Process pythonProcess;
-    public void start() {
-        try{
-            ProcessBuilder pb = new ProcessBuilder("python", PYTHON_SCRIPT);
+            
+            //builds command to run python
+            ProcessBuilder bob = new ProcessBuilder("python", ServPath, pyDir);
+            bob.redirectErrorStream(true);
+            bob.inheritIO();// links IO stream to java
 
-            pb.redirectErrorStream(true);
-            pb.inheritIO();
+            pyProcess = bob.start();//Fires off the python process
+            System.out.println("[CVProcessManager] Python started.");
 
-            pythonProcess = pb.start();
-            System.out.println("[CVProcessManager] Python started.");   
-        }
-        catch(Exception e){
-            System.out.println(e.getMessage());
         } 
+        catch (Exception e){
+            System.out.println("[CVProcessManager] Python isnt waking up : " + e.getMessage());
+        }
     }
 
-    public void stop() {
-        if (pythonProcess != null && pythonProcess.isAlive()) {
-            pythonProcess.destroy();
+    public void stop(){
+        if (pyProcess != null && pyProcess.isAlive()) {
+            pyProcess.destroy();
             System.out.println("[CVProcessManager] Python stopped.");
         }
     }
 
-    public boolean isRunning() {
-        return pythonProcess != null && pythonProcess.isAlive();
-    }
+    public boolean isRunning(){return pyProcess != null && pyProcess.isAlive();}
 }

@@ -1,51 +1,56 @@
+//ts file listens for inputs from the python server and forwards them to gesturemapper
 package system;
-
+//imports
 import gestures.GestureMapper;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.Socket;
 
 public class GestureService implements Runnable{
+    //portnumber for tcp socket
+    private static final int PORT = 6767;//funni number
+    private GestureMapper mapist;
+    private boolean isrunning = false;
+    private Socket Sock;
 
-    private static final int PORT = 6767;
+    public GestureService(GestureMapper mapist){this.mapist = mapist;}
 
-    private GestureMapper map;
-    private boolean running = false;
-    private Socket socket;
-
-    public GestureService(GestureMapper map) {
-        this.map = map;
-    }
-
-    public void run() {
-        running = true;
+public void run(){
+        isrunning = true;
         try {
-            socket = new Socket("localhost", PORT);
-            System.out.println("[GestureService] Connected to Python!");
+            //socket created here
+            Sock=new Socket("localhost", PORT);
+            System.out.println("[GestureService] Lesgooooo Connected to Python!");
+//wrap input from python and read 1 line at a time vv
+            BufferedReader reader = new BufferedReader(new InputStreamReader(Sock.getInputStream()));
 
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-            String line;
-            while (running && (line = reader.readLine()) != null) {
-                String gestureName = line.trim();
-                map.handle(gestureName);
+            String ts;
+            while (isrunning && (ts = reader.readLine()) != null) {
+                String Name = ts.trim();//removes spaces etc.
+                mapist.handle(Name);// method from gesturmapper
+                
+                //System.out.println(Name);
             }
 
-        } catch (Exception e) {
-            if (running) {
-                System.out.println("[GestureService] Connection error: " + e.getMessage());
+        } 
+         catch (Exception e){
+            if (isrunning) {
+            System.out.println("[GestureService] Connection error: " + e.getMessage());
             }
         }
     }
 
 
-    public void stop() {
-        running = false;
-        try {
-            if (socket != null){ socket.close();}
-        } catch (Exception e) {
-            System.out.println("[GestureService] Error stopping: " + e.getMessage());
-        }
-        System.out.println("[GestureService] Stopped.");
+
+
+
+public void stop(){//to close da socket when stopped
+    isrunning = false;
+    try {if (Sock != null){Sock.close();}}
+    catch(Exception e) {
+        System.out.println("[GestureService] Error stopping" + e.getMessage());
     }
+    System.out.println("[GestureService] Stopped.");
+
+}
 }

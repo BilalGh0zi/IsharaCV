@@ -1,3 +1,4 @@
+//uses javas built in robot to move and click mouse
 package controllers;
 
 import com.sun.jna.Native;
@@ -32,7 +33,7 @@ public class MouseController {
         System.out.println("[MouseController] Double click");
     }
 
-    // Reads speed live from SettingsManager so slider changes take effect immediately
+    // Reads pointer speed from SettingsManager 
     public static void moveUp() {
         int speed = SettingsManager.getInstance().getMouseSpeed();
         Point p = MouseInfo.getPointerInfo().getLocation();
