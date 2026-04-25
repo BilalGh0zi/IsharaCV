@@ -1,6 +1,7 @@
 package gui;
 
 import gestures.GestureMapper;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -21,6 +22,7 @@ public class MainMenu {
     private Thread gestureThread;
 
     private Label RunStatus;
+    private Label ModeLabel;
 
     public MainMenu(AppStateManager stateManager,
                     CVProcessManager cvManager,
@@ -38,6 +40,10 @@ public class MainMenu {
         RunStatus = new Label("Status: IDLE");
         RunStatus.setStyle("-fx-font-size: 14px; -fx-text-fill: gray;");
 
+       
+        ModeLabel = new Label("Mode: VOLUME");
+        ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: blue;");
+
         Button runButton = new Button("Run");
         runButton.setPrefWidth(200);
         runButton.setStyle("-fx-font-size: 14px;");
@@ -48,21 +54,20 @@ public class MainMenu {
         stopButton.setStyle("-fx-font-size: 14px;");
         stopButton.setOnAction(e -> onStop());
 
-
         Button settingsButton = new Button("Settings");
         settingsButton.setPrefWidth(200);
         settingsButton.setStyle("-fx-font-size: 14px;");
         settingsButton.setOnAction(e -> {
-            
             SettingsWindow settingsWindow = new SettingsWindow(gestureMapper);
             settingsWindow.show(new Stage());
         });
 
-        VBox layout = new VBox(15, Title, RunStatus,runButton, stopButton, settingsButton);
+        VBox layout = new VBox(15, Title, RunStatus, ModeLabel,
+                               runButton, stopButton, settingsButton);
         layout.setAlignment(Pos.CENTER);
         layout.setPadding(new Insets(30));
 
-        Scene scene = new Scene(layout, 350, 300);
+        Scene scene = new Scene(layout, 350, 350);
         stage.setTitle("IsharaApp");
         stage.setScene(scene);
 
@@ -74,24 +79,33 @@ public class MainMenu {
         stage.show();
     }
 
-  
     private void onRun() {
         if (stateManager.isRunning()) {
             System.out.println("[MainMenu] Already running.");
             return;
         }
 
-      
         cvManager.start();
 
-       
         try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
 
         gestureService = new GestureService(gestureMapper);
         gestureThread = new Thread(gestureService);
-        gestureThread.setDaemon(true); 
+        gestureThread.setDaemon(true);
         gestureThread.start();
 
+        
+        gestureMapper.setModeChangeListener(isMoveMode -> {
+            Platform.runLater(() -> {
+                if (isMoveMode) {
+                    ModeLabel.setText("Mode: MOVE");
+                    ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: orange;");
+                } else {
+                    ModeLabel.setText("Mode: VOLUME");
+                    ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: blue;");
+                }
+            });
+        });
 
         stateManager.setRunning();
         RunStatus.setText("Status: RUNNING");
@@ -99,12 +113,15 @@ public class MainMenu {
         System.out.println("[MainMenu] System started.");
     }
 
-
     private void onStop() {
         if (!stateManager.isRunning()) return;
         if (gestureService != null) gestureService.stop();
-        
+
         cvManager.stop();
+
+       
+        ModeLabel.setText("Mode: VOLUME");
+        ModeLabel.setStyle("-fx-font-size: 14px; -fx-text-fill: blue;");
 
         stateManager.setIdle();
         RunStatus.setText("Status: IDLE");

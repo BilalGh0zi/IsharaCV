@@ -1,5 +1,6 @@
 package gui;
 
+import config.SettingsManager;
 import gestures.GestureMapper;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,8 +12,6 @@ import javafx.stage.Stage;
 public class SettingsWindow {
 
     private GestureMapper gestureMapper;
-private static final String[] GESTURES = {"ONE_FINGER", "TWO_FINGERS", "THREE_FINGERS", "FIST", "PINCH"};
-private static final String[] ACTIONS = {"VOLUME_UP", "VOLUME_DOWN", "MUTE", "LEFT_CLICK", "DOUBLE_CLICK", "NONE"};
 
     public SettingsWindow(GestureMapper gestureMapper) {
         this.gestureMapper = gestureMapper;
@@ -20,53 +19,132 @@ private static final String[] ACTIONS = {"VOLUME_UP", "VOLUME_DOWN", "MUTE", "LE
 
     public void show(Stage stage) {
 
-        Label titleLabel = new Label("Gesture Settings");
-        titleLabel.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+       
+        Label instructTitle = new Label("How to Use Ishara");
+        instructTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-  
-        GridPane grid = new GridPane();
-        grid.setHgap(15);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(15));
+        Label volumeHeader = new Label("VOLUME MODE (default)");
+        volumeHeader.setStyle("-fx-font-weight: bold; -fx-text-fill: blue;");
+
+        Label volumeInstructions = new Label(
+            "ONE FINGER     →  Volume Up\n" +
+            "TWO FINGERS    →  Volume Down\n" +
+            "THREE FINGERS  →  Mute\n" +
+            "FIST           →  Left Click\n" +
+            "PINCH          →  Double Click\n" +
+            "ROCK HAND      →  Switch to Move Mode"
+        );
+        volumeInstructions.setStyle("-fx-font-family: monospace; -fx-font-size: 13px;");
+
+        Label moveHeader = new Label("MOVE MODE");
+        moveHeader.setStyle("-fx-font-weight: bold; -fx-text-fill: orange;");
+
+        Label moveInstructions = new Label(
+            "ONE FINGER     →  Move Up\n" +
+            "TWO FINGERS    →  Move Right\n" +
+            "THREE FINGERS  →  Move Left\n" +
+            "FIST           →  Left Click\n" +
+            "PINCH          →  Move Down\n" +
+            "ROCK HAND      →  Switch to Volume Mode"
+        );
+        moveInstructions.setStyle("-fx-font-family: monospace; -fx-font-size: 13px;");
+
+        VBox instructLayout = new VBox(12, instructTitle,
+                                       volumeHeader, volumeInstructions,
+                                       moveHeader, moveInstructions);
+        instructLayout.setPadding(new Insets(20));
+
+        Tab instructTab = new Tab("Instructions", instructLayout);
+        instructTab.setClosable(false);
+
+       
+
+        SettingsManager s = SettingsManager.getInstance();
+
+        Label tuningTitle = new Label("Performance Tuning");
+        tuningTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
         
-        grid.add(new Label("Gesture"), 0, 0);
-        grid.add(new Label("Action"), 1, 0);
+        Slider mouseSpeedSlider    = makeSlider(1,  50, s.getMouseSpeed());
+        Slider volumeCooldownSlider = makeSlider(50, 500, s.getVolumeCooldown());
+        Slider clickCooldownSlider  = makeSlider(200, 2000, s.getClickCooldown());
+        Slider muteCooldownSlider   = makeSlider(500, 3000, s.getMuteCooldown());
+        Slider moveCooldownSlider   = makeSlider(20, 300, s.getMoveCooldown());
+        Slider framesSlider         = makeSlider(1, 10, s.getFramesRequired());
 
-   
-        ComboBox<String>[] combos = new ComboBox[GESTURES.length];
-        for (int i = 0; i < GESTURES.length; i++) {
-            String gesture = GESTURES[i];
+        
+        Label mouseSpeedVal    = makeValueLabel(mouseSpeedSlider);
+        Label volumeCooldownVal = makeValueLabel(volumeCooldownSlider);
+        Label clickCooldownVal  = makeValueLabel(clickCooldownSlider);
+        Label muteCooldownVal   = makeValueLabel(muteCooldownSlider);
+        Label moveCooldownVal   = makeValueLabel(moveCooldownSlider);
+        Label framesVal         = makeValueLabel(framesSlider);
 
-            grid.add(new Label(gesture), 0, i + 1);
+        GridPane tuningGrid = new GridPane();
+        tuningGrid.setHgap(10);
+        tuningGrid.setVgap(12);
+        tuningGrid.setPadding(new Insets(15));
 
-            ComboBox<String> combo = new ComboBox<>();
-            combo.getItems().addAll(ACTIONS);
+        addTuningRow(tuningGrid, 0, "Mouse Speed (px)",       mouseSpeedSlider,     mouseSpeedVal);
+        addTuningRow(tuningGrid, 1, "Volume Cooldown (ms)",   volumeCooldownSlider, volumeCooldownVal);
+        addTuningRow(tuningGrid, 2, "Click Cooldown (ms)",    clickCooldownSlider,  clickCooldownVal);
+        addTuningRow(tuningGrid, 3, "Mute Cooldown (ms)",     muteCooldownSlider,   muteCooldownVal);
+        addTuningRow(tuningGrid, 4, "Move Cooldown (ms)",     moveCooldownSlider,   moveCooldownVal);
+        addTuningRow(tuningGrid, 5, "Gesture Sensitivity",    framesSlider,         framesVal);
 
-            String currentAction = gestureMapper.getMappings().getOrDefault(gesture, "NONE");
-            combo.setValue(currentAction);
-
-            combos[i] = combo;
-            grid.add(combo, 1, i + 1);
-        }
-
+       
         Button saveButton = new Button("Save");
         saveButton.setPrefWidth(150);
         saveButton.setOnAction(e -> {
-        
-            for (int i = 0; i < GESTURES.length; i++) {
-                gestureMapper.updateMapping(GESTURES[i], combos[i].getValue());
-            }
-            System.out.println("[SettingsWindow] Settings saved.");
-            stage.close(); 
+            s.setMouseSpeed((int) mouseSpeedSlider.getValue());
+            s.setVolumeCooldown((int) volumeCooldownSlider.getValue());
+            s.setClickCooldown((int) clickCooldownSlider.getValue());
+            s.setMuteCooldown((int) muteCooldownSlider.getValue());
+            s.setMoveCooldown((int) moveCooldownSlider.getValue());
+            s.setFramesRequired((int) framesSlider.getValue());
+            s.save(gestureMapper.getMappings());
+            System.out.println("[SettingsWindow] Tuning saved.");
+            stage.close();
         });
 
-        VBox layout = new VBox(15, titleLabel, grid, saveButton);
-        layout.setAlignment(Pos.CENTER);
-        layout.setPadding(new Insets(20));
+        VBox tuningLayout = new VBox(15, tuningTitle, tuningGrid, saveButton);
+        tuningLayout.setAlignment(Pos.CENTER);
+        tuningLayout.setPadding(new Insets(20));
 
-        stage.setTitle("Settings");
-        stage.setScene(new Scene(layout, 350, 400));
+        Tab tuningTab = new Tab("Tuning", tuningLayout);
+        tuningTab.setClosable(false);
+
+        
+        TabPane tabPane = new TabPane(instructTab, tuningTab);
+
+        stage.setTitle("Ishara Settings");
+        stage.setScene(new Scene(tabPane, 420, 420));
         stage.show();
+    }
+
+   
+    private Slider makeSlider(int min, int max, int value) {
+        Slider slider = new Slider(min, max, value);
+        slider.setShowTickMarks(true);
+        slider.setMajorTickUnit((max - min) / 4.0);
+        slider.setPrefWidth(200);
+        return slider;
+    }
+
+    
+    private Label makeValueLabel(Slider slider) {
+        Label label = new Label(String.valueOf((int) slider.getValue()));
+        label.setMinWidth(40);
+        slider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            label.setText(String.valueOf(newVal.intValue()));
+        });
+        return label;
+    }
+
+    
+    private void addTuningRow(GridPane grid, int row, String labelText, Slider slider, Label valueLabel) {
+        grid.add(new Label(labelText), 0, row);
+        grid.add(slider, 1, row);
+        grid.add(valueLabel, 2, row);
     }
 }
