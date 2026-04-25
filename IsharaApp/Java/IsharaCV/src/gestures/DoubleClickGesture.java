@@ -9,6 +9,6 @@ public class DoubleClickGesture extends Gesture implements GestureAction {
 
     @Override
     public void execute() {
-        MouseController.leftClick();
+        MouseController.doubleClick();
     }
 }
