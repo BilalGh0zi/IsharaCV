@@ -1,3 +1,4 @@
+//Settings Window gui
 package gui;
 
 import config.SettingsManager;
@@ -6,7 +7,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.*;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class SettingsWindow {
@@ -17,134 +18,222 @@ public class SettingsWindow {
         this.gestureMapper = gestureMapper;
     }
 
+    //functions that help convert slider's percentage to values
+    private double mapToPercent(int value, int min, int max) {
+        if (max == min) return 0;
+        return ((double)(value - min) / (max - min)) * 100.0;
+    }
+    private int mapFromPercent(double percent, int min, int max) {
+        return (int) Math.round(min + (percent / 100.0) * (max - min));
+    }
     public void show(Stage stage) {
-
-       
-        Label instructTitle = new Label("How to Use Ishara");
-        instructTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-
-        Label volumeHeader = new Label("VOLUME MODE (default)");
-        volumeHeader.setStyle("-fx-font-weight: bold; -fx-text-fill: blue;");
-
-        Label volumeInstructions = new Label(
-            "ONE FINGER     →  Volume Up\n" +
-            "TWO FINGERS    →  Volume Down\n" +
-            "THREE FINGERS  →  Mute\n" +
-            "FIST           →  Left Click\n" +
-            "PINCH          →  Double Click\n" +
-            "ROCK HAND      →  Switch to Move Mode"
-        );
-        volumeInstructions.setStyle("-fx-font-family: monospace; -fx-font-size: 13px;");
-
-        Label moveHeader = new Label("MOVE MODE");
-        moveHeader.setStyle("-fx-font-weight: bold; -fx-text-fill: orange;");
-
-        Label moveInstructions = new Label(
-            "ONE FINGER     →  Move Up\n" +
-            "TWO FINGERS    →  Move Right\n" +
-            "THREE FINGERS  →  Move Left\n" +
-            "FIST           →  Left Click\n" +
-            "PINCH          →  Move Down\n" +
-            "ROCK HAND      →  Switch to Volume Mode"
-        );
-        moveInstructions.setStyle("-fx-font-family: monospace; -fx-font-size: 13px;");
-
-        VBox instructLayout = new VBox(12, instructTitle,
-                                       volumeHeader, volumeInstructions,
-                                       moveHeader, moveInstructions);
-        instructLayout.setPadding(new Insets(20));
-
-        Tab instructTab = new Tab("Instructions", instructLayout);
-        instructTab.setClosable(false);
-
-       
-
+        //makes sure only one instance of Settingsmanager exists ata time
+        //see SettingsManager for context
         SettingsManager s = SettingsManager.getInstance();
 
-        Label tuningTitle = new Label("Performance Tuning");
-        tuningTitle.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+        Label title = new Label("Settings");
+        title.setStyle(
+        "-fx-font-size: 30px;" +
+        "-fx-font-weight: bold;" +
+        "-fx-text-fill: linear-gradient(to left, #00ffcc, #4facfe);"
+        );
+
+        Button mouseMode  = new Button("Mouse Movement Mode");
+        Button volumeMode = new Button("Volume Control Mode");
+        styleButton(mouseMode);
+        styleButton(volumeMode);
+        mouseMode.setPrefWidth(220);
+        volumeMode.setPrefWidth(220);
+        mouseMode.setPrefHeight(34);
+        volumeMode.setPrefHeight(34);
+
 
         
-        Slider mouseSpeedSlider    = makeSlider(1,  50, s.getMouseSpeed());
-        Slider volumeCooldownSlider = makeSlider(50, 500, s.getVolumeCooldown());
-        Slider clickCooldownSlider  = makeSlider(200, 2000, s.getClickCooldown());
-        Slider muteCooldownSlider   = makeSlider(500, 3000, s.getMuteCooldown());
-        Slider moveCooldownSlider   = makeSlider(20, 300, s.getMoveCooldown());
-        Slider framesSlider         = makeSlider(1, 10, s.getFramesRequired());
+        
+        // VOLUME MODE SLIDERS
+        
+        Slider volumeSpeedSlider = makeGradientSlider();//from 0 to 450 millisec
+        volumeSpeedSlider.setValue(mapToPercent(500 - s.getVolumeCooldown(), 0, 450));
+        Label volumeSpeedLabel = makeSliderLabel("Volume Change Speed", volumeSpeedSlider);
+
+        Slider muteCooldownSlider = makeGradientSlider();
+        muteCooldownSlider.setValue(mapToPercent(3000 - s.getMuteCooldown(), 0, 2500));
+        Label muteCooldownLabel = makeSliderLabel("Mute Cooldown", muteCooldownSlider);
+
+        Slider GestureSensSlider = makeGradientSlider();// Gesture sensitivity
+        GestureSensSlider.setValue(mapToPercent(10 - s.getFramesRequired(), 0, 9));
+        Label GestureSensLabel = makeSliderLabel("Gesture Sensitivity", GestureSensSlider);
+
+        VBox volumeSliders = new VBox(8,
+            volumeSpeedLabel, volumeSpeedSlider,
+            muteCooldownLabel, muteCooldownSlider,
+            GestureSensLabel, GestureSensSlider
+        );
 
         
-        Label mouseSpeedVal    = makeValueLabel(mouseSpeedSlider);
-        Label volumeCooldownVal = makeValueLabel(volumeCooldownSlider);
-        Label clickCooldownVal  = makeValueLabel(clickCooldownSlider);
-        Label muteCooldownVal   = makeValueLabel(muteCooldownSlider);
-        Label moveCooldownVal   = makeValueLabel(moveCooldownSlider);
-        Label framesVal         = makeValueLabel(framesSlider);
+        
+        // MOUSE MODE SLIDERS
+        
+        Slider mouseSpeedSlider = makeGradientSlider();// how many px mouse moves at a time
+        mouseSpeedSlider.setValue(mapToPercent(s.getMouseSpeed(), 1, 50));
+        Label mouseSpeedLabel = makeSliderLabel("Pointer Speed", mouseSpeedSlider);
 
-        GridPane tuningGrid = new GridPane();
-        tuningGrid.setHgap(10);
-        tuningGrid.setVgap(12);
-        tuningGrid.setPadding(new Insets(15));
+        Slider moveCooldownSlider = makeGradientSlider();// how often mouse moves
+        moveCooldownSlider.setValue(mapToPercent(300 - s.getMoveCooldown(), 0, 280));
+        Label moveCooldownLabel = makeSliderLabel("Move Cooldown", moveCooldownSlider);
 
-        addTuningRow(tuningGrid, 0, "Mouse Speed (px)",       mouseSpeedSlider,     mouseSpeedVal);
-        addTuningRow(tuningGrid, 1, "Volume Cooldown (ms)",   volumeCooldownSlider, volumeCooldownVal);
-        addTuningRow(tuningGrid, 2, "Click Cooldown (ms)",    clickCooldownSlider,  clickCooldownVal);
-        addTuningRow(tuningGrid, 3, "Mute Cooldown (ms)",     muteCooldownSlider,   muteCooldownVal);
-        addTuningRow(tuningGrid, 4, "Move Cooldown (ms)",     moveCooldownSlider,   moveCooldownVal);
-        addTuningRow(tuningGrid, 5, "Gesture Sensitivity",    framesSlider,         framesVal);
+        Slider gestureSensSlider = makeGradientSlider();//sensitivityl
+        gestureSensSlider.setValue(mapToPercent(10 - s.getFramesRequired(), 0, 9));
+        Label gestureSensLabel = makeSliderLabel("Gesture Sensitivity", gestureSensSlider);
 
-       
-        Button saveButton = new Button("Save");
-        saveButton.setPrefWidth(150);
-        saveButton.setOnAction(e -> {
-            s.setMouseSpeed((int) mouseSpeedSlider.getValue());
-            s.setVolumeCooldown((int) volumeCooldownSlider.getValue());
-            s.setClickCooldown((int) clickCooldownSlider.getValue());
-            s.setMuteCooldown((int) muteCooldownSlider.getValue());
-            s.setMoveCooldown((int) moveCooldownSlider.getValue());
-            s.setFramesRequired((int) framesSlider.getValue());
+        VBox mouseSliders = new VBox(8,
+            mouseSpeedLabel, mouseSpeedSlider,
+            moveCooldownLabel, moveCooldownSlider,
+            gestureSensLabel, gestureSensSlider
+        );
+
+        
+        // Starts with volume sliders shown by default
+        VBox activeSliders = new VBox(volumeSliders);
+
+        // Mode button swaps which sliders are visible
+        mouseMode.setOnAction(e -> {activeSliders.getChildren().setAll(mouseSliders);});
+        volumeMode.setOnAction(e -> {activeSliders.getChildren().setAll(volumeSliders);});
+
+
+        // SAVE BUTTON
+        
+        Button saveBtn = new Button("Save");
+        styleButton(saveBtn);
+        saveBtn.setPrefWidth(220);
+        saveBtn.setPrefHeight(34);
+
+        saveBtn.setOnAction(e -> {
+            // Save volume settings
+            s.setVolumeCooldown(500 - mapFromPercent(volumeSpeedSlider.getValue(), 0, 450));
+            s.setMuteCooldown(3000 - mapFromPercent(muteCooldownSlider.getValue(), 0, 2500));
+
+            // Save mouse settings
+            s.setMouseSpeed(mapFromPercent(mouseSpeedSlider.getValue(), 1, 50));
+            s.setMoveCooldown(300 - mapFromPercent(moveCooldownSlider.getValue(), 0, 280));
+
+            // Gesture sensitivity 
+            // both sliders map to same setting so just save one
+            s.setFramesRequired(10 - mapFromPercent(GestureSensSlider.getValue(), 0, 9));
+
             s.save(gestureMapper.getMappings());
-            System.out.println("[SettingsWindow] Tuning saved.");
+            System.out.println("[SettingsWindow] Settings saved.");
             stage.close();
         });
 
-        VBox tuningLayout = new VBox(15, tuningTitle, tuningGrid, saveButton);
-        tuningLayout.setAlignment(Pos.CENTER);
-        tuningLayout.setPadding(new Insets(20));
+        // SETTINGS layout
+        VBox settingsLayout = new VBox(10,
+            title,
+            mouseMode,
+            volumeMode,
+            activeSliders,
+            saveBtn
+        );
+        settingsLayout.setAlignment(Pos.CENTER);
+        settingsLayout.setPadding(new Insets(15));
+        settingsLayout.setStyle("-fx-background-color: #1e1f22;");
 
-        Tab tuningTab = new Tab("Tuning", tuningLayout);
-        tuningTab.setClosable(false);
+       
+        // Instructions Section
+        Label instructionsLabel = new Label(
+            "How to Use Ishara\n\n" +
 
+            "VOLUME MODE (default)\n\n" +
+            "ONE FINGER      → Volume Up\n" +
+            "TWO FINGERS     → Volume Down\n" +
+            "THREE FINGERS   → Mute\n" +
+            "FIST            → Left Click\n" +
+            "PINCH           → Double Click\n" +
+            "ROCK HAND       → Switch to Move Mode\n\n" +
+
+            "MOVE MODE\n\n" +
+            "ONE FINGER      → Move Up\n" +
+            "TWO FINGERS     → Move Right\n" +
+            "THREE FINGERS   → Move Left\n" +
+            "FIST            → Left Click\n" +
+            "PINCH           → Move Down\n" +
+            "ROCK HAND       → Switch to Volume Mode"
+        );
+        instructionsLabel.setStyle(
+            "-fx-text-fill: white;" +
+            "-fx-font-size: 13px;" +
+            "-fx-font-family: 'Consolas';"
+        );
+        instructionsLabel.setWrapText(true);
+
+        VBox instructionsLayout = new VBox(instructionsLabel);
+        instructionsLayout.setPadding(new Insets(15));
+        instructionsLayout.setStyle("-fx-background-color: #1e1f22;");
+    
         
-        TabPane tabPane = new TabPane(instructTab, tuningTab);
+        // Tabs
+        Tab settingsTab     = new Tab("Settings",     settingsLayout);
+        Tab instructionsTab = new Tab("Instructions", instructionsLayout);
+        settingsTab.setClosable(false);
+        instructionsTab.setClosable(false);
 
-        stage.setTitle("Ishara Settings");
-        stage.setScene(new Scene(tabPane, 420, 420));
+        TabPane tabPane = new TabPane(settingsTab, instructionsTab);
+
+        stage.setTitle("Settings");
+        stage.setScene(new Scene(tabPane, 450, 420));
         stage.show();
     }
-
-   
-    private Slider makeSlider(int min, int max, int value) {
-        Slider slider = new Slider(min, max, value);
-        slider.setShowTickMarks(true);
-        slider.setMajorTickUnit((max - min) / 4.0);
-        slider.setPrefWidth(200);
-        return slider;
-    }
+    
 
     
-    private Label makeValueLabel(Slider slider) {
-        Label label = new Label(String.valueOf((int) slider.getValue()));
-        label.setMinWidth(40);
-        slider.valueProperty().addListener((obs, oldVal, newVal) -> {
-            label.setText(String.valueOf(newVal.intValue()));
-        });
+    // Aesthetic helper functions
+ 
+    private Label makeSliderLabel(String name, Slider slider) {
+        Label label = new Label(name + ": " + (int) slider.getValue() + "%");
+        label.setStyle("-fx-text-fill: white;");
+        slider.valueProperty().addListener((obs, o, n) ->
+            label.setText(name + ": " + n.intValue() + "%")
+        );
         return label;
     }
 
-    
-    private void addTuningRow(GridPane grid, int row, String labelText, Slider slider, Label valueLabel) {
-        grid.add(new Label(labelText), 0, row);
-        grid.add(slider, 1, row);
-        grid.add(valueLabel, 2, row);
+    private void styleButton(Button btn) {
+        String baseStyle =
+            "-fx-background-color: #2f3136;" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-radius: 20;";
+
+        String hoverStyle =
+            "-fx-background-color: #40444b;" +
+            "-fx-text-fill: white;" +
+            "-fx-background-radius: 20;" +
+            "-fx-border-radius: 20;";
+
+        btn.setStyle(baseStyle);
+        btn.setOnMouseEntered(e -> btn.setStyle(hoverStyle));
+        btn.setOnMouseExited(e -> btn.setStyle(baseStyle));
+    }
+
+    private Slider makeGradientSlider() {
+        Slider slider = new Slider(0, 100, 50);
+        slider.setStyle(
+            "-fx-control-inner-background: #2f3136;" +
+            "-fx-background-color: transparent;"
+        );
+
+        slider.valueProperty().addListener((obs, oldVal, newVal) -> {
+            double percent = newVal.doubleValue() / slider.getMax();
+            String gradient =
+                "linear-gradient(to right, #9b59b6 " +
+                (percent * 100) + "%, #2f3136 " +
+                (percent * 100) + "%)";
+            slider.applyCss();
+            slider.lookup(".track").setStyle(
+                "-fx-background-color: " + gradient + ";"
+            );
+        });
+
+        return slider;
     }
 }

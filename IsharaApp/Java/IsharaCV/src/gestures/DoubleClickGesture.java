@@ -1,3 +1,4 @@
+//Double click gesture
 package gestures;
 import controllers.MouseController;
 

@@ -36,7 +36,8 @@ except:
 
 #TCP Socket setup
 serverPy = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-serverPy.bind(("localhost", 6767))
+serverPy.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+serverPy.bind(("localhost", 6767)) 
 serverPy.listen(1)
 print("Waiting for Java...(o_O)")
 javaPipe, javaAddress = serverPy.accept()

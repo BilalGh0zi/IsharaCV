@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<launch4jConfig>
+  <dontWrapJar>false</dontWrapJar>
+  <headerType>gui</headerType>
+  <jar>C:\Users\Bilal\Desktop\IsharaFinal\IsharaApp\IsharaApp.jar</jar>
+  <outfile>C:\Users\Bilal\Desktop\IsharaFinal\IsharaApp\IsharaApp.exe</outfile>
+  <errTitle></errTitle>
+  <cmdLine></cmdLine>
+  <chdir>.</chdir>
+  <priority>normal</priority>
+  <downloadUrl></downloadUrl>
+  <supportUrl></supportUrl>
+  <stayAlive>false</stayAlive>
+  <restartOnCrash>false</restartOnCrash>
+  <manifest></manifest>
+  <icon></icon>
+  <classPath>
+    <mainClass>app.IsharaApp</mainClass>
+    <cp>Java\IsharaCV\lib\jna-5.18.1.jar</cp>
+    <cp>Java\IsharaCV\lib\jna-platform-5.18.1.jar</cp>
+    <cp>Java\IsharaCV\lib\gson-2.10.1.jar</cp>
+    <cp>Java\javafx-sdk-21.0.10\lib\javafx.controls.jar</cp>
+    <cp>Java\javafx-sdk-21.0.10\lib\javafx.base.jar</cp>
+    <cp>Java\javafx-sdk-21.0.10\lib\javafx.graphics.jar</cp>
+  </classPath>
+  <jre>
+    <path>%JAVA_HOME%;%PATH%</path>
+    <requiresJdk>false</requiresJdk>
+    <requires64Bit>false</requires64Bit>
+    <minVersion>11</minVersion>
+    <maxVersion></maxVersion>
+    <opt>--module-path Java\javafx-sdk-21.0.10\lib --add-modules javafx.controls</opt>
+  </jre>
+</launch4jConfig>

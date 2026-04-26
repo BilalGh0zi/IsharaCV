@@ -1,12 +1,12 @@
-//creates a new gesture object depending on the input
+//creates a new gesture object depending on the input with switch
 package gestures;
 
 public class GestureFactory {
 
-    public static Gesture create(String actionName) {
+    public static Gesture create(String Name) {
 
-        switch (actionName) {
-
+        switch (Name) {
+//volume factory
             case "VOLUME_UP":
                 return new VolumeUpGesture();
 
@@ -15,13 +15,13 @@ public class GestureFactory {
 
             case "MUTE":
                 return new MuteGesture();
-                
+//Clickfactory                
             case "LEFT_CLICK":
                 return new LeftClickGesture();
 
             case "DOUBLE_CLICK":
                 return new DoubleClickGesture();
-            
+//movement factory            
             case "MOVE_UP":
                 return new MoveUpGesture();
 
@@ -34,7 +34,7 @@ public class GestureFactory {
             case "MOVE_RIGHT":
                 return new MoveRightGesture();
             default:
-                System.out.println("[GestureFactory] Unknown action: " + actionName);
+                System.out.println("[GestureFactory] Unknown action: " + Name);
                 return null;
         }
     }

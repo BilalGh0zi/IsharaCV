@@ -23,21 +23,24 @@ public class PathFinder {
         return friend;
     }
     private String findRootDir(){
-        try {
-            // Get the directory of class files
-    File ClassDir = new File(PathFinder.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-
-    //basically exits the directory till it reaches IsharaApp folder
-    File root = ClassDir.getParentFile().getParentFile().getParentFile(); 
-    return root.getAbsolutePath();
-
-        } catch (URISyntaxException e){
-            System.out.println("[PathFinder] Directory not found");
-            return System.getProperty("user.dir");
-            //returning current directory if not found
+    try {
+        File loc = new File(PathFinder.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        
+        //for exe version
+        if (loc.getName().endsWith(".jar") || loc.getName().endsWith(".exe")) {
+        return loc.getParentFile().getAbsolutePath();
         }
-    }
+        System.out.println("[PathFinder] loc = " + loc.getAbsolutePath());//debug
+        
+       //for .bat version
+        return loc.getParentFile().getParentFile().getParentFile().getAbsolutePath();
 
+    } 
+    catch (URISyntaxException e){
+        System.out.println("[PathFinder] Directory not found");
+        return System.getProperty("user.dir");
+    }
+}
    //for a file in config folder
     public String getConfigPath(String name){
         return rootDir  +"\\"+"config"+"\\"+ name;

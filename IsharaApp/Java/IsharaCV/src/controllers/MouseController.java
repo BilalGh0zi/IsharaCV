@@ -35,26 +35,26 @@ public class MouseController {
 
     // Reads pointer speed from SettingsManager 
     public static void moveUp() {
-        int speed = SettingsManager.getInstance().getMouseSpeed();
+        int spd = SettingsManager.getInstance().getMouseSpeed();
         Point p = MouseInfo.getPointerInfo().getLocation();
-        robot.mouseMove(p.x, p.y - speed);
+        robot.mouseMove(p.x, p.y - spd);
     }
 
     public static void moveDown() {
-        int speed = SettingsManager.getInstance().getMouseSpeed();
+        int spd = SettingsManager.getInstance().getMouseSpeed();
         Point p = MouseInfo.getPointerInfo().getLocation();
-        robot.mouseMove(p.x, p.y + speed);
+        robot.mouseMove(p.x, p.y + spd);
     }
 
     public static void moveLeft() {
-        int speed = SettingsManager.getInstance().getMouseSpeed();
+        int spd = SettingsManager.getInstance().getMouseSpeed();
         Point p = MouseInfo.getPointerInfo().getLocation();
-        robot.mouseMove(p.x - speed, p.y);
+        robot.mouseMove(p.x - spd, p.y);
     }
 
     public static void moveRight() {
-        int speed = SettingsManager.getInstance().getMouseSpeed();
+        int spd = SettingsManager.getInstance().getMouseSpeed();
         Point p = MouseInfo.getPointerInfo().getLocation();
-        robot.mouseMove(p.x + speed, p.y);
+        robot.mouseMove(p.x + spd, p.y);
     }
 }

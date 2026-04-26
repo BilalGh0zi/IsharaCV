@@ -1,4 +1,5 @@
 //maps Actions to recieved Gestures and executes
+//one of the more importand classes in the program
 package gestures;
 
 import config.SettingsManager;
@@ -8,11 +9,11 @@ import java.util.HashMap;
 public class GestureMapper {
 
     private boolean moveMode = false;//bool to switch modes
-    private Map<String, String> gestureMap;
+    private Map<String, String> Map;
     private Map<String, Long> CooldownTime = new HashMap<>();
 
     public GestureMapper() {
-        gestureMap = SettingsManager.getInstance().load();
+        Map =SettingsManager.getInstance().load();
     }
     public boolean isMoveMode() {
         return moveMode;
@@ -35,9 +36,9 @@ public class GestureMapper {
     private String ChooseAction(String name) {
 
     if (name.equals("FIST")){ return "LEFT_CLICK";}
-    if (name.equals("ROCK_HAND")) {return "SWITCH_MODE";}
+    if (name.equals("ROCK_HAND")){return "SWITCH_MODE";}
 
-    if (moveMode) {
+    if (moveMode){
         switch (name) {
                 case "ONE_FINGER":   return "MOVE_UP";
                 case "TWO_FINGER":   return "MOVE_RIGHT";
@@ -56,7 +57,7 @@ public class GestureMapper {
         }
     }
 
-    public void handle(String name) {
+    public void handle(String name){
 
         if (name == null || name.equals("NONE")){ return;}
 
@@ -65,7 +66,7 @@ public class GestureMapper {
         if (thisTime - prev < getCooldown(name)){ return;}//cooldown check
         CooldownTime.put(name, thisTime);
 
-        //mode change logic
+        //mode change message
         if (name.equals("ROCK_HAND")) {
             if (moveMode){moveMode = false;}
             else if (!moveMode){moveMode = true;}
@@ -73,24 +74,24 @@ public class GestureMapper {
             return;
         }
         //take corresponding action from name
-        String action = ChooseAction(name);
-        if (action == null) {
+        String Action = ChooseAction(name);
+        if (Action == null) {
             System.out.println("[GestureMapper] No action for: " + name);
             return;
         }
             //execute gesture
-        Gesture gesture = GestureFactory.create(action);
-        if (gesture != null) {
-            gesture.execute();
+        Gesture g =GestureFactory.create(Action);
+        if (g!= null) {
+            g.execute();
         }
     }
 
     public void updateMapping(String name, String action) {
-        gestureMap.put(name, action);
-        SettingsManager.getInstance().save(gestureMap);
+        Map.put(name, action);
+        SettingsManager.getInstance().save(Map);
     }
 
     public Map<String, String> getMappings() {
-        return gestureMap;
+        return Map;
     }
 }

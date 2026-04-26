@@ -8,7 +8,7 @@ public class LeftClickGesture extends Gesture implements GestureAction {
     }
 
     @Override
-    public void execute() {
+    public void execute(){
         MouseController.leftClick();
     }
 }

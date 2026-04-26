@@ -18,9 +18,23 @@ public class GestureService implements Runnable{
 public void run(){
         isrunning = true;
         try {
-            //socket created here
-            Sock=new Socket("localhost", PORT);
-            System.out.println("[GestureService] Lesgooooo Connected to Python!");
+            int maxAttempts = 20; 
+            for (int i = 0; i < maxAttempts; i++) {
+                try {
+                    Sock = new Socket("localhost", PORT);
+                    System.out.println("[GestureService] Lesgooooo Connected to Python!"); 
+                    break;
+                    
+                } 
+                catch (Exception e) {
+                    System.out.println("[GestureService] Waiting for server... (" + (i+1) + "/" + maxAttempts + ")");
+                    Thread.sleep(500);
+                }
+            }
+            if (Sock == null) {
+                System.out.println("[GestureService] Connection error: Could not reach Python server.");
+                return;
+            }
 //wrap input from python and read 1 line at a time vv
             BufferedReader reader = new BufferedReader(new InputStreamReader(Sock.getInputStream()));
 
